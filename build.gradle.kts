@@ -1,5 +1,4 @@
-import org.jetbrains.kotlin.gradle.dsl.Coroutines
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import com.moowork.gradle.node.npm.NpmTask
 
 val ktor_version: String by project
 val kotlin_version: String by project
@@ -8,6 +7,7 @@ val logback_version: String by project
 plugins {
     application
     kotlin("jvm") version "1.4.21"
+    id("com.github.node-gradle.node") version "2.2.4"
 }
 
 group = "org.choottd"
@@ -38,3 +38,39 @@ kotlin.sourceSets["test"].kotlin.srcDirs("test")
 
 sourceSets["main"].resources.srcDirs("resources")
 sourceSets["test"].resources.srcDirs("testresources")
+
+
+tasks.register("appNpmInstall", NpmTask::class) {
+    description = "Installs all dependencies from package.json"
+    setWorkingDir(file("${project.projectDir}/client"))
+    setArgs(listOf("install"))
+}
+
+tasks.register("appNpmBuild", NpmTask::class) {
+    dependsOn(tasks.named("appNpmInstall"))
+    description = "Builds production version of the webapp"
+    setWorkingDir(file("${project.projectDir}/client"))
+    setArgs(listOf("run", "build"))
+}
+
+tasks.register("copyWebApp", Copy::class) {
+    dependsOn(tasks.named("appNpmBuild"))
+    from("client/build")
+    into("build/resources/main/static/.")
+}
+
+tasks.named("compileJava") {
+    dependsOn(tasks.named("copyWebApp"))
+}
+
+node {
+
+    version = "14.15.4"
+    download = true
+
+    // Set the work directory for unpacking node
+    workDir = file("${project.buildDir}/nodejs")
+
+    // Set the work directory for NPM
+    npmWorkDir = file("${project.buildDir}/npm")
+}

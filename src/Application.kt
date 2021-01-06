@@ -52,12 +52,12 @@ fun Application.module(testing: Boolean = false) {
     }
 
     routing {
-        get("/") {
-            call.respondText("CIPPONE!", contentType = ContentType.Text.Plain)
-        }
+//        get("/") {
+//            call.respondText("TEST!", contentType = ContentType.Text.Plain)
+//        }
 
         // Static feature. Try to access `/static/ktor_logo.svg`
-        static("/static") {
+        static("/") {
             resources("static")
         }
 

@@ -25,6 +25,8 @@ plugins {
     application
     kotlin("jvm") version "1.4.21"
     id("com.github.node-gradle.node") version "2.2.4"
+    maven
+    id("maven-publish")
 }
 
 group = "org.choottd"
@@ -38,9 +40,17 @@ repositories {
     mavenLocal()
     jcenter()
     maven { url = uri("https://kotlin.bintray.com/ktor") }
+    maven {
+        url = uri("https://maven.pkg.github.com/choottd/librcon")
+        credentials {
+            username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
+            password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
+        }
+    }
 }
 
 dependencies {
+    implementation("org.choottd:librcon:0.1.0-SNAPSHOT")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version")
     implementation("io.ktor:ktor-server-netty:$ktor_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")

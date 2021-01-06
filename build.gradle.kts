@@ -1,4 +1,4 @@
-import com.moowork.gradle.node.npm.NpmTask
+import com.moowork.gradle.node.yarn.YarnTask
 
 val ktor_version: String by project
 val kotlin_version: String by project
@@ -40,21 +40,21 @@ sourceSets["main"].resources.srcDirs("resources")
 sourceSets["test"].resources.srcDirs("testresources")
 
 
-tasks.register("appNpmInstall", NpmTask::class) {
+tasks.register("yarnInstall", YarnTask::class) {
     description = "Installs all dependencies from package.json"
     setWorkingDir(file("${project.projectDir}/client"))
-    setArgs(listOf("install"))
+    args = listOf("install")
 }
 
-tasks.register("appNpmBuild", NpmTask::class) {
-    dependsOn(tasks.named("appNpmInstall"))
+tasks.register("yarnBuild", YarnTask::class) {
+    dependsOn(tasks.named("yarnInstall"))
     description = "Builds production version of the webapp"
     setWorkingDir(file("${project.projectDir}/client"))
-    setArgs(listOf("run", "build"))
+    args = listOf("build")
 }
 
 tasks.register("copyWebApp", Copy::class) {
-    dependsOn(tasks.named("appNpmBuild"))
+    dependsOn(tasks.named("yarnBuild"))
     from("client/build")
     into("build/resources/main/static/.")
 }
@@ -64,13 +64,6 @@ tasks.named("compileJava") {
 }
 
 node {
-
     version = "14.15.4"
     download = true
-
-    // Set the work directory for unpacking node
-    workDir = file("${project.buildDir}/nodejs")
-
-    // Set the work directory for NPM
-    npmWorkDir = file("${project.buildDir}/npm")
 }

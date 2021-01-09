@@ -17,15 +17,19 @@
 
 package org.choottd
 
+import com.fasterxml.jackson.databind.SerializationFeature
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.http.content.*
-import io.ktor.response.*
+import io.ktor.jackson.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.websocket.*
+import org.choottd.config.configRouting
+import org.kodein.db.DB
+import org.kodein.db.impl.open
 import java.time.Duration
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
@@ -33,6 +37,13 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
+    install(ContentNegotiation) {
+
+        jackson {
+            enable(SerializationFeature.INDENT_OUTPUT)
+        }
+    }
+
     install(Compression) {
         gzip {
             priority = 1.0
@@ -49,9 +60,8 @@ fun Application.module(testing: Boolean = false) {
         method(HttpMethod.Delete)
         method(HttpMethod.Patch)
         header(HttpHeaders.Authorization)
-        header("MyCustomHeader")
         allowCredentials = true
-        anyHost() // @TODO: Don't do this in production if possible. Try to limit it.
+        anyHost()
     }
 
     install(ShutDownUrl.ApplicationCallFeature) {
@@ -68,17 +78,19 @@ fun Application.module(testing: Boolean = false) {
         masking = false
     }
 
-    routing {
-//        get("/") {
-//            call.respondText("TEST!", contentType = ContentType.Text.Plain)
-//        }
+    val dbpath = environment.config.propertyOrNull("ktor.choottd.db-path")?.getString() ?: "./choottd.db"
+    val db = DB.open(dbpath)
 
-        // Static feature. Try to access `/static/ktor_logo.svg`
+    routing {
+
+        configRouting(db)
+
         static("/") {
             resources("static")
+            defaultResource("static/index.html")
         }
 
-        webSocket("/myws/echo") {
+        webSocket("/api") {
             send(Frame.Text("Hi from server"))
             while (true) {
                 val frame = incoming.receive()

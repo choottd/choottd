@@ -16,15 +16,35 @@
  */
 
 import React from 'react';
+import logo from './logo.png';
 import './App.less';
-import {Button} from "antd";
+import {Button, Layout} from "antd";
+import {PlusOutlined} from "@ant-design/icons";
+
+const {Header, Content, Footer, Sider} = Layout;
 
 function App() {
-  return (
-    <div className="App">
-      <Button type="primary">Button</Button>
-    </div>
-  );
+
+    return (
+        <Layout style={{minHeight: '100vh'}}>
+            <Sider collapsible>
+                <div className={"logo-container"}>
+                    <img alt={"logo"} className={"logo"} src={logo}/>
+                </div>
+
+                <div className={"button-container"}>
+                    <Button type="primary" icon={<PlusOutlined/>}>New Server</Button>
+                </div>
+
+            </Sider>
+            <Layout className="site-layout">
+                <Content style={{margin: '0 16px'}}>
+                    <div className="site-layout-background" style={{padding: 24, minHeight: 360}}>
+                    </div>
+                </Content>
+            </Layout>
+        </Layout>
+    );
 }
 
 export default App;

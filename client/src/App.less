@@ -17,21 +17,32 @@
 
 @import '~antd/dist/antd.less';
 
-.logo-container {
-  display: flex;
-  justify-content: center;
-}
-
 .button-container {
   display: flex;
   justify-content: center;
 }
 
 .logo {
-  height: 80px;
-  margin: 8px auto;
+  float: left;
+  height: 60px;
 }
 
-.site-layout .site-layout-background {
-  background: #fff;
+.title {
+  margin-left: 8px;
+  color: #ffffff;
+  //font-weight: bold;
+  font-size: 20px;
+}
+
+.main-layout {
+  min-height: 100vh;
+
+  .main-content {
+    padding: 16px;
+  }
+}
+
+.page {
+  background-color: #ffffff;
+  padding: 8px;
 }

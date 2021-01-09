@@ -18,31 +18,50 @@
 import React from 'react';
 import logo from './logo.png';
 import './App.less';
-import {Button, Layout} from "antd";
+import {Button, Col, Layout, Row} from "antd";
 import {PlusOutlined} from "@ant-design/icons";
+import {Link, Route, Switch} from 'react-router-dom';
+import ServerPage from "./server/ServerPage";
+import EditServerPage from "./edit-server/EditServerPage";
+import HomePage from "./home/HomePage";
 
-const {Header, Content, Footer, Sider} = Layout;
+const {Content, Header} = Layout;
 
 function App() {
 
     return (
-        <Layout style={{minHeight: '100vh'}}>
-            <Sider collapsible>
-                <div className={"logo-container"}>
-                    <img alt={"logo"} className={"logo"} src={logo}/>
-                </div>
-
-                <div className={"button-container"}>
-                    <Button type="primary" icon={<PlusOutlined/>}>New Server</Button>
-                </div>
-
-            </Sider>
-            <Layout className="site-layout">
-                <Content style={{margin: '0 16px'}}>
-                    <div className="site-layout-background" style={{padding: 24, minHeight: 360}}>
-                    </div>
-                </Content>
-            </Layout>
+        <Layout className={'main-layout'}>
+            <Header>
+                <Row gutter={16}>
+                    <Col flex={"auto"}>
+                        <Link to={"/"}>
+                            <img alt={"logo"} className={"logo"} src={logo}/>
+                            <span className={"title"}>CHOOTTD</span>
+                        </Link>
+                    </Col>
+                    <Col>
+                        <Link to={"/new-server"}>
+                            <Button type="primary" icon={<PlusOutlined/>}>New Server</Button>
+                        </Link>
+                    </Col>
+                </Row>
+            </Header>
+            <Content className={"main-content"}>
+                <Switch>
+                    <Route path="/server/:id">
+                        <ServerPage/>
+                    </Route>
+                    <Route path="/new-server">
+                        <EditServerPage/>
+                    </Route>
+                    <Route path="/edit-server">
+                        <EditServerPage/>
+                    </Route>
+                    <Route path="/">
+                        <HomePage/>
+                    </Route>
+                </Switch>
+            </Content>
         </Layout>
     );
 }

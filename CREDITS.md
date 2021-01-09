@@ -1,0 +1,1 @@
+Logo created using the original OpenTTD logo and an icon made by [iconixar](https://www.flaticon.com/free-icon/cloud_1163573?term=cloud&page=1&position=8&related_item_id=1163573) from [www.flaticon.com](https://www.flaticon.com/)

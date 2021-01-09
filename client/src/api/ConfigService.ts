@@ -16,17 +16,17 @@
  */
 
 import {ApiService} from "./ApiService";
-import {AddConfigCommand, Config, UpdateConfigCommand} from "./ConfigDTOs";
+import {AddConfigCommand, ConfigResponse, UpdateConfigCommand} from "./ConfigDTOs";
 import {API_URL} from "../Const";
 
 export class ConfigService extends ApiService {
 
-    static async getConfigs(): Promise<Config[]> {
+    static async getConfigs(): Promise<ConfigResponse[]> {
         const resp = await this._get(`${API_URL}/configs`);
         return await resp.json();
     }
 
-    static async getConfigById(id: string): Promise<Config> {
+    static async getConfigById(id: string): Promise<ConfigResponse> {
         const resp = await this._get(`${API_URL}/configs/${id}`);
         return await resp.json();
     }

@@ -30,7 +30,8 @@ import org.kodein.db.getById
 fun Route.configRouting(db: DB) {
 
     get("/api/configs") {
-        val configs = db.find(Config::class).all().use { it.asModelSequence().toList() }
+        val configs = db.find(Config::class).all()
+            .use { it.asModelSequence().map { c -> ConfigResponse(c.host, c.port) }.toList() }
         call.respond(configs)
     }
 

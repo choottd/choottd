@@ -19,7 +19,7 @@ import React, {useEffect, useState} from 'react';
 import {useHistory, useParams} from 'react-router-dom';
 import {Button, Col, Form, Input, notification, Row} from "antd";
 import {CloudServerOutlined, KeyOutlined, NumberOutlined} from "@ant-design/icons";
-import {AddConfigCommand, Config, UpdateConfigCommand} from "../api/ConfigDTOs";
+import {AddConfigCommand, ConfigResponse, UpdateConfigCommand} from "../api/ConfigDTOs";
 import {ConfigService} from "../api/ConfigService";
 
 function EditServerPage() {
@@ -27,7 +27,7 @@ function EditServerPage() {
     const params = useParams<{ id: string | undefined }>();
     const isEdit = params.id !== undefined;
 
-    const [config, setConfig] = useState<Config>()
+    const [config, setConfig] = useState<ConfigResponse>()
 
     const [form] = Form.useForm();
 
@@ -61,7 +61,7 @@ function EditServerPage() {
         history.push("/");
     };
 
-    const onFinishFailed = (errorInfo: any) => {
+    const onFinishFailed = () => {
         notification.error({
             message: 'Error',
             description: 'Failed to add the configuration',

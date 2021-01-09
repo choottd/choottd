@@ -22,3 +22,12 @@ data class AddConfigCommand(
     val port: Int,
     val password: String
 )
+
+data class UpdateConfigCommand(
+    val password: String
+)
+
+data class ConfigResponse(
+    val host: String,
+    val port: Int,
+)

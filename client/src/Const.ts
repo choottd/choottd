@@ -15,34 +15,4 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-@import '~antd/dist/antd.less';
-
-.button-container {
-  display: flex;
-  justify-content: center;
-}
-
-.logo {
-  float: left;
-  height: 60px;
-}
-
-.title {
-  margin-left: 8px;
-  color: #ffffff;
-  //font-weight: bold;
-  font-size: 20px;
-}
-
-.main-layout {
-  min-height: 100vh;
-
-  .main-content {
-    padding: 8px;
-  }
-}
-
-.page {
-  background-color: #ffffff;
-  padding: 8px;
-}
+export const API_URL = process.env.REACT_APP_API_URL

@@ -38,7 +38,7 @@ function EditServerPage() {
                 setConfig(conf)
             }
         })();
-    });
+    }, []);
 
     const onFinish = async (values: any) => {
         if (isEdit) {
@@ -79,7 +79,6 @@ function EditServerPage() {
                     initialValues={{
                         host: config?.host,
                         port: config?.port ?? 3977,
-                        password: config?.password,
                     }}
                     onFinish={onFinish}
                     onFinishFailed={onFinishFailed}>

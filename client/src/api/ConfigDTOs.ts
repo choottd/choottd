@@ -16,9 +16,9 @@
  */
 
 export interface ConfigResponse {
+    id: string
     host: string
     port: number
-    password: string
 }
 
 export interface AddConfigCommand {

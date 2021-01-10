@@ -28,6 +28,7 @@ data class UpdateConfigCommand(
 )
 
 data class ConfigResponse(
+    val id: String,
     val host: String,
     val port: Int,
 )

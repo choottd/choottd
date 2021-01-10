@@ -26,18 +26,19 @@ import org.kodein.db.DB
 import org.kodein.db.asModelSequence
 import org.kodein.db.deleteById
 import org.kodein.db.getById
+import org.kodein.memory.util.UUID
 
 fun Route.configRouting(db: DB) {
 
     get("/api/configs") {
         val configs = db.find(Config::class).all()
-            .use { it.asModelSequence().map { c -> ConfigResponse(c.host, c.port) }.toList() }
+            .use { it.asModelSequence().map { c -> ConfigResponse(c.id.toString(), c.host, c.port) }.toList() }
         call.respond(configs)
     }
 
     post("/api/configs") {
         val cmd = call.receive<AddConfigCommand>()
-        val newConfig = Config(cmd.host, cmd.port, cmd.password)
+        val newConfig = Config(UUID.randomUUID(), cmd.host, cmd.port, cmd.password)
         db.put(newConfig)
         call.respond(HttpStatusCode.Created)
     }

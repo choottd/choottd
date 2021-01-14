@@ -15,5 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const API_URL = process.env.REACT_APP_API_URL
-export const WS_URL = process.env.REACT_APP_WS_URL
+package org.choottd.monitor
+
+import org.choottd.librcon.session.event.SessionEvent
+
+data class OpenttdEvent(
+    val configId: String,
+    val event: SessionEvent
+)

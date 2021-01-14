@@ -15,5 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const API_URL = process.env.REACT_APP_API_URL
-export const WS_URL = process.env.REACT_APP_WS_URL
+import React from "react";
+import {Card} from "antd";
+import {ConfigResponse} from "../api/ConfigDTOs";
+import {SessionEvent} from "../websocket/OpenttdEvents";
+
+interface Props {
+    config: ConfigResponse,
+    sessionEvent?: SessionEvent,
+}
+
+function ServerItem({config, sessionEvent}: Props) {
+
+    return <Card title={`${config.host}:${config.port}`} extra={1}>
+        <p>{sessionEvent?.timestamp}</p>
+    </Card>
+
+}
+
+export default ServerItem;

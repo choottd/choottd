@@ -27,9 +27,15 @@ import io.ktor.jackson.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.websocket.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import org.choottd.config.configRouting
-import org.kodein.db.DB
-import org.kodein.db.impl.open
+import org.choottd.monitor.MonitoringService
+import org.choottd.monitor.OpenttdEvent
+import org.choottd.websocket.webSocketHandler
+import org.dizitart.kno2.nitrite
+import org.dizitart.no2.Nitrite
+import java.io.File
 import java.time.Duration
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
@@ -82,25 +88,28 @@ fun Application.module(testing: Boolean = false) {
     }
 
     val dbpath = environment.config.propertyOrNull("ktor.choottd.db-path")?.getString() ?: "./choottd.db"
-    val db = DB.open(dbpath)
+    val db = nitrite {
+        file = File(dbpath)
+        autoCommitBufferSize = 2048
+        compress = true
+        autoCompact = false
+    }
+
+
+    val openttdEventsFlow = MutableSharedFlow<OpenttdEvent>()
+    val monitoringService = MonitoringService(openttdEventsFlow)
 
     routing {
 
-        configRouting(db)
+        configRouting(db, monitoringService)
 
         static("/") {
             resources("static")
             defaultResource("static/index.html")
         }
 
-        webSocket("/api") {
-            send(Frame.Text("Hi from server"))
-            while (true) {
-                val frame = incoming.receive()
-                if (frame is Frame.Text) {
-                    send(Frame.Text("Client said: " + frame.readText()))
-                }
-            }
+        webSocket("/openttdEvents") {
+            webSocketHandler(openttdEventsFlow.asSharedFlow())
         }
     }
 }

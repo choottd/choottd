@@ -32,12 +32,8 @@ function EditServerPage() {
     const [form] = Form.useForm();
 
     useEffect(() => {
-        (async () => {
-            if (isEdit) {
-                const conf = await ConfigService.getConfigById(params.id!);
-                setConfig(conf)
-            }
-        })();
+        const sub = ConfigService.getConfigById(params.id!).subscribe(setConfig);
+        return () => sub.unsubscribe();
     }, []);
 
     const onFinish = async (values: any) => {

@@ -15,5 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const API_URL = process.env.REACT_APP_API_URL
-export const WS_URL = process.env.REACT_APP_WS_URL
+import {WS_URL} from "../Const";
+import {WebSocketSubject} from "rxjs/internal-compatibility";
+
+export interface SessionEvent {
+    timestamp: number
+}
+
+export interface OpenttdEvent {
+    configId: string
+    event: SessionEvent
+}
+
+export const openttdEvents$ = new WebSocketSubject<OpenttdEvent>(WS_URL!);

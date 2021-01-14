@@ -17,14 +17,14 @@
 
 package org.choottd.config
 
-import kotlinx.serialization.Serializable
-import org.kodein.db.model.orm.Metadata
-import org.kodein.memory.util.UUID
+import org.dizitart.no2.objects.Id
+import java.util.*
 
-@Serializable
+
 data class Config(
-    override val id: UUID,
+    @Id
+    val id: UUID,
     val host: String,
     val port: Int,
     val password: String
-) : Metadata
+)

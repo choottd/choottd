@@ -18,25 +18,24 @@
 import {ApiService} from "./ApiService";
 import {AddConfigCommand, ConfigResponse, UpdateConfigCommand} from "./ConfigDTOs";
 import {API_URL} from "../Const";
+import {Observable} from "rxjs";
 
 export class ConfigService extends ApiService {
 
-    static async getConfigs(): Promise<ConfigResponse[]> {
-        const resp = await this._get(`${API_URL}/configs`);
-        return await resp.json();
+    static getConfigs(): Observable<ConfigResponse[]> {
+        return this.json(this._get(`${API_URL}/configs`));
     }
 
-    static async getConfigById(id: string): Promise<ConfigResponse> {
-        const resp = await this._get(`${API_URL}/configs/${id}`);
-        return await resp.json();
+    static getConfigById(id: string): Observable<ConfigResponse> {
+        return this.json(this._get(`${API_URL}/configs/${id}`))
     }
 
-    static async postConfig(config: AddConfigCommand): Promise<Response> {
-        return await this._post(`${API_URL}/configs`, config);
+    static postConfig(config: AddConfigCommand): Observable<Response> {
+        return this._post(`${API_URL}/configs`, config);
     }
 
-    static async putConfig(config: UpdateConfigCommand): Promise<Response> {
-        return await this._put(`${API_URL}/configs`, config);
+    static putConfig(config: UpdateConfigCommand): Observable<Response> {
+        return this._put(`${API_URL}/configs`, config);
     }
 
 }

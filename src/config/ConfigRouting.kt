@@ -22,24 +22,25 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import org.kodein.db.DB
-import org.kodein.db.asModelSequence
-import org.kodein.db.deleteById
-import org.kodein.db.getById
-import org.kodein.memory.util.UUID
+import org.choottd.monitor.MonitoringService
+import org.dizitart.kno2.filters.eq
+import org.dizitart.no2.Nitrite
+import java.util.*
 
-fun Route.configRouting(db: DB) {
+fun Route.configRouting(db: Nitrite, monitoringService: MonitoringService) {
+
+    val configRepository = db.getRepository(Config::class.java)
 
     get("/api/configs") {
-        val configs = db.find(Config::class).all()
-            .use { it.asModelSequence().map { c -> ConfigResponse(c.id.toString(), c.host, c.port) }.toList() }
-        call.respond(configs)
+        val configs = configRepository.find().toList()
+        monitoringService.fetchGlobalData(configs)
+        call.respond(configs.map { c -> ConfigResponse(c.id.toString(), c.host, c.port) })
     }
 
     post("/api/configs") {
         val cmd = call.receive<AddConfigCommand>()
         val newConfig = Config(UUID.randomUUID(), cmd.host, cmd.port, cmd.password)
-        db.put(newConfig)
+        configRepository.insert(newConfig)
         call.respond(HttpStatusCode.Created)
     }
 
@@ -49,7 +50,7 @@ fun Route.configRouting(db: DB) {
             return@delete
         }
 
-        db.deleteById<Config>(id)
+        configRepository.remove(Config::id eq id)
     }
 
     put("/api/configs/{id}") {
@@ -59,12 +60,12 @@ fun Route.configRouting(db: DB) {
         }
 
         val cmd = call.receive<UpdateConfigCommand>()
-        val conf = db.getById<Config>(id) ?: kotlin.run {
+        val conf = configRepository.find(Config::id eq id).firstOrNull() ?: kotlin.run {
             call.respond(HttpStatusCode.BadRequest)
             return@put
         }
         val newConf = conf.copy(password = cmd.password)
-        db.put(newConf)
+        configRepository.update(newConf)
     }
 
 }

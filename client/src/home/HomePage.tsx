@@ -15,12 +15,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, {useEffect, useState} from 'react';
+import {ConfigResponse} from "../api/ConfigDTOs";
+import {ConfigService} from "../api/ConfigService";
+import {Col, Row} from "antd";
+import ServerItem from "./ServerItem";
+import {openttdEvents$, SessionEvent} from "../websocket/OpenttdEvents";
 
 function HomePage() {
+    const [configs, setConfigs] = useState<ConfigResponse[]>([]);
+    const [eventsMap, setEventsMap] = useState<Map<string, SessionEvent>>(new Map());
+
+    useEffect(() => {
+        const ottdSub = openttdEvents$.subscribe(ev => {
+            eventsMap.set(ev.configId, ev.event);
+            setEventsMap(eventsMap);
+        });
+        const configSub = ConfigService.getConfigs().subscribe(setConfigs);
+        return () => {
+            ottdSub.unsubscribe();
+            configSub.unsubscribe();
+        };
+    }, [eventsMap])
 
     return <div className={"page"}>
-        Home
+        <Row gutter={16}>
+            {
+                configs.map((config, index) =>
+                    <Col span={6} key={index}>
+                        <ServerItem config={config} sessionEvent={eventsMap.get(config.id)}/>
+                    </Col>)
+            }
+        </Row>
     </div>
 
 }

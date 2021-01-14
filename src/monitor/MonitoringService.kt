@@ -15,5 +15,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const API_URL = process.env.REACT_APP_API_URL
-export const WS_URL = process.env.REACT_APP_WS_URL
+package org.choottd.monitor
+
+import kotlinx.coroutines.flow.MutableSharedFlow
+import org.choottd.config.Config
+import org.choottd.librcon.session.fetchAllData
+import java.util.*
+
+class MonitoringService(
+    private val openttdEventsFlow: MutableSharedFlow<OpenttdEvent>
+) {
+
+    private val facades = mutableMapOf<UUID, OpenttdFacade>()
+
+    fun fetchGlobalData(configs: List<Config>) {
+        configs.forEach {
+            val facade = facades.getOrPut(it.id) { OpenttdFacade(it, openttdEventsFlow) }
+            facade.openttdSession.fetchAllData()
+        }
+    }
+
+
+}

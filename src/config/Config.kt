@@ -27,4 +27,6 @@ data class Config(
     val host: String,
     val port: Int,
     val password: String
-)
+) {
+    override fun toString(): String = "Config(host=$host,port=$port)"
+}

@@ -16,34 +16,47 @@
  */
 
 import React, {useEffect, useState} from 'react';
-import {ConfigResponse} from "../api/ConfigDTOs";
-import {ConfigService} from "../api/ConfigService";
 import {Col, Row} from "antd";
 import ServerItem from "./ServerItem";
-import {openttdEvents$, SessionEvent} from "../websocket/OpenttdEvents";
+import {
+    OpenttdEvent,
+    SessionEvent,
+    SimpleSendEvent,
+    webSocketInput$,
+    webSocketOutput$
+} from "../websocket/OpenttdEvents";
+import {interval} from "rxjs";
 
 function HomePage() {
-    const [configs, setConfigs] = useState<ConfigResponse[]>([]);
     const [eventsMap, setEventsMap] = useState<Map<string, SessionEvent>>(new Map());
 
     useEffect(() => {
-        const ottdSub = openttdEvents$.subscribe(ev => {
-            eventsMap.set(ev.configId, ev.event);
-            setEventsMap(eventsMap);
-        });
-        const configSub = ConfigService.getConfigs().subscribe(setConfigs);
+        const wsSubscription = webSocketInput$
+            .subscribe(event => {
+                const ev = event as OpenttdEvent;
+                eventsMap.set(ev.configId, ev.event);
+                const newMap = new Map(eventsMap.entries())
+                setEventsMap(newMap);
+            });
+
+        const pollSubscription = interval(5000)
+            .subscribe(() => {
+                webSocketOutput$.next(new SimpleSendEvent("Hello!"))
+            });
+
         return () => {
-            ottdSub.unsubscribe();
-            configSub.unsubscribe();
+            console.debug("Unsubscribe from observables")
+            wsSubscription.unsubscribe();
+            pollSubscription.unsubscribe();
         };
-    }, [eventsMap])
+    }, [])
 
     return <div className={"page"}>
         <Row gutter={16}>
             {
-                configs.map((config, index) =>
+                Array.from(eventsMap.values()).map((sessionEvent, index) =>
                     <Col span={6} key={index}>
-                        <ServerItem config={config} sessionEvent={eventsMap.get(config.id)}/>
+                        <ServerItem sessionEvent={sessionEvent}/>
                     </Col>)
             }
         </Row>

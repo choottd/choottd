@@ -16,15 +16,47 @@
  */
 
 import {WS_URL} from "../Const";
-import {WebSocketSubject} from "rxjs/internal-compatibility";
+import {webSocket} from "rxjs/webSocket";
+import {catchError, tap} from "rxjs/operators";
+import {Observable, of, Subject} from "rxjs";
 
 export interface SessionEvent {
     timestamp: number
 }
 
-export interface OpenttdEvent {
+export interface WSEvent {
+}
+
+export interface ReceivedEvent extends WSEvent {
+}
+
+export interface SendEvent extends WSEvent {
+}
+
+export interface OpenttdEvent extends ReceivedEvent {
     configId: string
     event: SessionEvent
 }
 
-export const openttdEvents$ = new WebSocketSubject<OpenttdEvent>(WS_URL!);
+export interface DummyEvent extends ReceivedEvent {
+}
+
+export class SimpleSendEvent implements SendEvent {
+    constructor(readonly message: string) {
+    }
+}
+
+const webSocketSubject$ = webSocket<WSEvent>(WS_URL!);
+
+export const webSocketInput$: Observable<ReceivedEvent> = webSocketSubject$
+    .pipe(
+        catchError((err) => {
+            console.error(err);
+            return of({} as DummyEvent)
+        }),
+        tap(event => {
+            console.debug(event);
+        })
+    )
+
+export const webSocketOutput$: Subject<SendEvent> = webSocketSubject$;

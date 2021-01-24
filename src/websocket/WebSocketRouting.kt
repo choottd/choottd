@@ -18,29 +18,63 @@
 package org.choottd.websocket
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.ktor.application.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import org.choottd.monitor.MonitoringService
 import org.choottd.monitor.OpenttdEvent
+import org.slf4j.LoggerFactory
 
-val mapper = ObjectMapper()
+private val logger = LoggerFactory.getLogger(Application::class.java)
+private val mapper = ObjectMapper()
 private fun convertToJson(event: OpenttdEvent) = mapper.writeValueAsString(event)
 
-suspend fun DefaultWebSocketServerSession.webSocketHandler(eventsFlow: SharedFlow<OpenttdEvent>) {
+@ExperimentalCoroutinesApi
+suspend fun DefaultWebSocketServerSession.webSocketHandler(
+    monitoringService: MonitoringService,
+    eventsFlow: SharedFlow<OpenttdEvent>
+) {
     val channel = Channel<OpenttdEvent>()
-    launch(Dispatchers.IO) {
+
+    // copies from the flow to the channel
+    val eventsJob = launch(Dispatchers.IO) {
         eventsFlow.onEach { channel.offer(it) }.launchIn(this)
     }
-    while (true) {
-        val event = channel.receive()
-        val json = convertToJson(event)
-        send(json)
+
+    val senderJob = launch(Dispatchers.IO) {
+        while (true) {
+            val event = channel.receive()
+            val json = convertToJson(event)
+            send(json)
+        }
     }
+
+    var stop = false
+    while (!stop) {
+        if (incoming.isClosedForReceive) {
+            stop = true
+            logger.debug("Websocket closed")
+            continue
+        }
+
+        try {
+            incoming.receive()
+            // TODO support other kind of messages
+            monitoringService.fetchGlobalData()
+        } catch (ex: ClosedReceiveChannelException) {
+            logger.debug("Websocket closed while waiting for incoming messages")
+        }
+    }
+
+    eventsJob.cancel()
+    senderJob.cancel()
+
 }

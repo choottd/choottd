@@ -17,17 +17,15 @@
 
 import React from "react";
 import {Card} from "antd";
-import {ConfigResponse} from "../api/ConfigDTOs";
 import {SessionEvent} from "../websocket/OpenttdEvents";
 
 interface Props {
-    config: ConfigResponse,
-    sessionEvent?: SessionEvent,
+    sessionEvent: SessionEvent,
 }
 
-function ServerItem({config, sessionEvent}: Props) {
+function ServerItem({sessionEvent}: Props) {
 
-    return <Card title={`${config.host}:${config.port}`} extra={1}>
+    return <Card title={`${sessionEvent.timestamp}`} extra={1}>
         <p>{sessionEvent?.timestamp}</p>
     </Card>
 

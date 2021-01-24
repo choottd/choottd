@@ -17,9 +17,7 @@
 
 package org.choottd.monitor
 
+import org.choottd.config.ConfigResponse
 import org.choottd.librcon.session.event.SessionEvent
 
-data class OpenttdEvent(
-    val configId: String,
-    val event: SessionEvent
-)
+data class OpenttdEvent(val config: ConfigResponse, val event: SessionEvent)

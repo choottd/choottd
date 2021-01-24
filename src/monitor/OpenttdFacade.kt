@@ -17,42 +17,46 @@
 
 package org.choottd.monitor
 
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.choottd.config.Config
+import org.choottd.config.ConfigResponse
 import org.choottd.librcon.session.Session
+import kotlin.coroutines.CoroutineContext
 
 class OpenttdFacade(
     private val config: Config,
     private val flow: MutableSharedFlow<OpenttdEvent>
-) {
+) : CoroutineScope {
 
-    private lateinit var sessionState: Job
-    private lateinit var session: Session
-    val openttdSession: Session // using this to communicate with OpenTTD
-        get() = session
+    private val job: Job = Job()
 
-    init {
-        newSession()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.IO + job
+
+    val openttdSession: Session = Session(BOT_NAME, BOT_VERSION, config.password, config.host, config.port)
+
+    fun start() = launch {
+        while (job.isActive) {
+            openttdSession.sessionEvents
+                .onEach {
+                    flow.emit(OpenttdEvent(ConfigResponse(config.id.toString(), config.host, config.port), it))
+                }
+                .launchIn(this)
+            openttdSession.open().join()
+        }
     }
 
-    private fun newSession() {
-        session = Session(BOT_NAME, BOT_VERSION, config.password, config.host, config.port)
-        session.sessionEvents
-            .onEach {
-                flow.emit(OpenttdEvent(config.id.toString(), it))
-            }
-            .launchIn(GlobalScope)
-        sessionState = session.open()
-//        sessionState.invokeOnCompletion { newSession() }
-    }
-
+    fun stop() = job.cancel()
 
     companion object {
         private const val BOT_NAME = "Choottd"
         private const val BOT_VERSION = "1"
-
     }
 
 }

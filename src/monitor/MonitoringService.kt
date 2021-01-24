@@ -17,21 +17,49 @@
 
 package org.choottd.monitor
 
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.choottd.config.Config
 import org.choottd.librcon.session.fetchAllData
+import org.dizitart.no2.Nitrite
+import org.slf4j.LoggerFactory
 import java.util.*
+import kotlin.coroutines.CoroutineContext
 
 class MonitoringService(
+    db: Nitrite,
     private val openttdEventsFlow: MutableSharedFlow<OpenttdEvent>
-) {
-
+) : CoroutineScope {
+    private val logger = LoggerFactory.getLogger(MonitoringService::class.java)
+    private val configRepository = db.getRepository(Config::class.java)
     private val facades = mutableMapOf<UUID, OpenttdFacade>()
 
-    fun fetchGlobalData(configs: List<Config>) {
+    private val job = Job()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.IO + job
+
+    fun stop() {
+        configRepository.close()
+        job.cancel()
+    }
+
+    private fun populateFacades() {
+        val configs = configRepository.find().toList()
+        logger.debug("Found ${configs.size} configurations")
         configs.forEach {
-            val facade = facades.getOrPut(it.id) { OpenttdFacade(it, openttdEventsFlow) }
-            facade.openttdSession.fetchAllData()
+            facades.getOrPut(it.id) {
+                val fac = OpenttdFacade(it, openttdEventsFlow)
+                logger.debug("Created facade for $it")
+                fac.start()
+                fac
+            }
+        }
+    }
+
+    fun fetchGlobalData() {
+        populateFacades()
+        facades.values.forEach {
+            it.openttdSession.fetchAllData()
         }
     }
 

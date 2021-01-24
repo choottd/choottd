@@ -34,7 +34,6 @@ import org.choottd.monitor.MonitoringService
 import org.choottd.monitor.OpenttdEvent
 import org.choottd.websocket.webSocketHandler
 import org.dizitart.kno2.nitrite
-import org.dizitart.no2.Nitrite
 import java.io.File
 import java.time.Duration
 
@@ -42,7 +41,7 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
-fun Application.module(testing: Boolean = false) {
+fun Application.module() {
     install(ContentNegotiation) {
 
         jackson {
@@ -82,7 +81,7 @@ fun Application.module(testing: Boolean = false) {
 
     install(WebSockets) {
         pingPeriod = Duration.ofSeconds(15)
-        timeout = Duration.ofSeconds(15)
+        timeout = Duration.ofSeconds(30)
         maxFrameSize = Long.MAX_VALUE
         masking = false
     }
@@ -97,11 +96,11 @@ fun Application.module(testing: Boolean = false) {
 
 
     val openttdEventsFlow = MutableSharedFlow<OpenttdEvent>()
-    val monitoringService = MonitoringService(openttdEventsFlow)
+    val monitoringService = MonitoringService(db, openttdEventsFlow)
 
     routing {
 
-        configRouting(db, monitoringService)
+        configRouting(db)
 
         static("/") {
             resources("static")
@@ -109,8 +108,12 @@ fun Application.module(testing: Boolean = false) {
         }
 
         webSocket("/openttdEvents") {
-            webSocketHandler(openttdEventsFlow.asSharedFlow())
+            webSocketHandler(monitoringService, openttdEventsFlow.asSharedFlow())
         }
     }
+
+    Runtime.getRuntime().addShutdownHook(Thread {
+        monitoringService.stop()
+    })
 }
 

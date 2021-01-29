@@ -51,18 +51,18 @@ dependencies {
     implementation("org.choottd:librcon:0.1.0-SNAPSHOT")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.21")
 
-    implementation("io.ktor:ktor-server-netty:1.5.1")
-    implementation("io.ktor:ktor-server-core:1.5.1")
-    implementation("io.ktor:ktor-server-host-common:1.5.1")
-    implementation("io.ktor:ktor-websockets:1.5.1")
-    implementation("io.ktor:ktor-jackson:1.5.1")
+    implementation("io.ktor:ktor-server-netty:1.5.0")
+    implementation("io.ktor:ktor-server-core:1.5.0")
+    implementation("io.ktor:ktor-server-host-common:1.5.0n")
+    implementation("io.ktor:ktor-websockets:1.5.0")
+    implementation("io.ktor:ktor-jackson:1.5.0")
 
     implementation("ch.qos.logback:logback-classic:1.2.3")
 
     implementation("org.dizitart:nitrite:3.4.3")
     implementation("org.dizitart:potassium-nitrite:3.4.3")
 
-    testImplementation("io.ktor:ktor-server-tests:1.5.1")
+    testImplementation("io.ktor:ktor-server-tests:1.5.0")
 }
 
 kotlin.sourceSets["main"].kotlin.srcDirs("src")

@@ -1,6 +1,5 @@
 import {from, Observable} from "rxjs";
 import {mergeMap} from "rxjs/operators";
-import {ConfigResponse} from "./ConfigDTOs";
 
 const DEFAULT_HEADERS = Object.freeze({'Content-Type': 'application/json'});
 

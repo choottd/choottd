@@ -16,28 +16,45 @@
  */
 
 import React from "react";
-import {Card} from "antd";
+import {Button, Card, Descriptions, Spin} from "antd";
 import {GameData, GameDate} from "../websocket/OpenttdEvents";
 import {ConfigResponse} from "../api/ConfigDTOs";
+import {CalendarOutlined, CloudServerOutlined} from "@ant-design/icons";
+import {Link} from "react-router-dom";
+import moment from "moment";
 
 interface Props {
     config: ConfigResponse,
     gameInfo?: GameData,
     gameDate?: GameDate,
+    timestamp?: number
 }
 
-function ServerItem({config, gameInfo, gameDate}: Props) {
+function ServerItem({config, gameInfo, gameDate, timestamp}: Props) {
 
     const gameDateStr = () => {
-        if(gameDate !== undefined) {
+        if (gameDate !== undefined) {
             return `${gameDate.day}.${gameDate.month}.${gameDate.year}`
         } else {
-            return `???`
+            return <Spin/>
         }
     };
 
-    return <Card title={`${config.host}:${config.port}`} extra={gameDateStr()}>
-        <p>{gameInfo?.name ?? "???"}</p>
+    return <Card
+        className={'server-item'}
+        title={gameInfo?.name ?? <Spin/>}
+        extra={timestamp ? <span className={'timestamp'}>{moment.utc(timestamp * 1000).fromNow()}</span> : <Spin/>}
+        actions={[
+            <Link to={`/server/${config.id}`}><Button type={"primary"}>View Details</Button></Link>
+        ]}>
+        <Descriptions colon={true} column={2}>
+            <Descriptions.Item label={<CloudServerOutlined title={"Server"}/>}>
+                {`${config.host}:${config.port}`}
+            </Descriptions.Item>
+            <Descriptions.Item label={<CalendarOutlined title={"Game Date"}/>}>
+                {gameDateStr()}
+            </Descriptions.Item>
+        </Descriptions>
     </Card>
 
 }

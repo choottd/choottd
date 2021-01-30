@@ -30,6 +30,7 @@ function HomePage() {
     const [configs, setConfigs] = useState<ConfigResponse[]>([]);
     const [gameInfos, setGameInfos] = useState<Map<string, GameData>>(new Map());
     const [gameDates, setGameDates] = useState<Map<string, GameDate>>(new Map());
+    const [lastTimestamps, setLastTimestamps] = useState<Map<string, number>>(new Map());
 
     useEffect(() => {
         ConfigService.getConfigs().subscribe(configs => setConfigs(configs));
@@ -59,6 +60,8 @@ function HomePage() {
                         setGameDates(new Map(gameDates.entries()));
                         break;
                 }
+                lastTimestamps.set(ev.configId, ev.event.timestamp);
+                setLastTimestamps(new Map(lastTimestamps.entries()));
             });
 
         const pollSubscription = interval(5000)
@@ -78,9 +81,10 @@ function HomePage() {
         <Row gutter={16}>
             {
                 configs.map((config, index) =>
-                    <Col span={6} key={index}>
+                    <Col span={8} key={index}>
                         <ServerItem
                             config={config}
+                            timestamp={lastTimestamps.get(config.id)}
                             gameDate={gameDates.get(config.id)}
                             gameInfo={gameInfos.get(config.id)}/>
                     </Col>)

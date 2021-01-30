@@ -22,9 +22,9 @@ import {Observable} from "rxjs";
 
 export class ConfigService extends ApiService {
 
-    // static getConfigs(): Observable<ConfigResponse[]> {
-    //     return this.json(this._get(`${API_URL}/configs`));
-    // }
+    static getConfigs(): Observable<ConfigResponse[]> {
+        return this.json(this._get(`${API_URL}/configs`));
+    }
 
     static getConfigById(id: string): Observable<ConfigResponse> {
         return this.json(this._get(`${API_URL}/configs/${id}`))

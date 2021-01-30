@@ -18,6 +18,8 @@
 package org.choottd
 
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
@@ -40,12 +42,12 @@ import java.time.Duration
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
 @Suppress("unused") // Referenced in application.conf
-@kotlin.jvm.JvmOverloads
 fun Application.module() {
     install(ContentNegotiation) {
 
         jackson {
             enable(SerializationFeature.INDENT_OUTPUT)
+            registerModule(KotlinModule())
         }
     }
 
@@ -108,7 +110,7 @@ fun Application.module() {
         }
 
         webSocket("/openttdEvents") {
-            webSocketHandler(monitoringService, openttdEventsFlow.asSharedFlow())
+            webSocketHandler(jacksonObjectMapper(), monitoringService, openttdEventsFlow.asSharedFlow())
         }
     }
 

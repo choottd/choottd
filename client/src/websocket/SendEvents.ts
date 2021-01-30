@@ -15,12 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.choottd.monitor
+import {Command} from "./WebSocket";
 
-import org.choottd.librcon.session.event.SessionEvent
-
-data class OpenttdEvent(
-    val configId: String,
-    val event: SessionEvent,
-    val eventType: String = event::class.java.simpleName
-)
+export const FetchAllGameUpdates: Command = {type: 'FetchAllGameUpdates'}
+export const FetchAllGameDates: Command = {type: 'FetchAllGameDates'}

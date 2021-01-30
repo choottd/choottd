@@ -21,6 +21,8 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.choottd.config.Config
 import org.choottd.librcon.session.fetchAllData
+import org.choottd.librcon.session.fetchGameDate
+import org.choottd.librcon.session.fetchGameInfo
 import org.dizitart.no2.Nitrite
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -60,6 +62,20 @@ class MonitoringService(
         populateFacades()
         facades.values.forEach {
             it.openttdSession.fetchAllData()
+        }
+    }
+
+    fun fetchAllGameUpdates() {
+        populateFacades()
+        facades.values.forEach {
+            it.openttdSession.fetchGameInfo()
+        }
+    }
+
+    fun fetchAllGameDates() {
+        populateFacades()
+        facades.values.forEach {
+            it.openttdSession.fetchGameDate()
         }
     }
 

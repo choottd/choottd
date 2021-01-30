@@ -22,7 +22,6 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import org.choottd.monitor.MonitoringService
 import org.dizitart.kno2.filters.eq
 import org.dizitart.no2.Nitrite
 import java.util.*
@@ -31,11 +30,10 @@ fun Route.configRouting(db: Nitrite) {
 
     val configRepository = db.getRepository(Config::class.java)
 
-//    get("/api/configs") {
-//        val configs = configRepository.find().toList()
-//        monitoringService.fetchGlobalData(configs)
-//        call.respond(configs.map { c -> ConfigResponse(c.id.toString(), c.host, c.port) })
-//    }
+    get("/api/configs") {
+        val configs = configRepository.find().toList()
+        call.respond(configs.map { c -> ConfigResponse(c.id.toString(), c.host, c.port) })
+    }
 
     post("/api/configs") {
         val cmd = call.receive<AddConfigCommand>()

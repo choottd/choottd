@@ -18,30 +18,53 @@
 import React, {useEffect, useState} from 'react';
 import {Col, Row} from "antd";
 import ServerItem from "./ServerItem";
-import {
-    OpenttdEvent,
-    SessionEvent,
-    SimpleSendEvent,
-    webSocketInput$,
-    webSocketOutput$
-} from "../websocket/OpenttdEvents";
+import {ErrorEvent, webSocketInput$, webSocketOutput$} from "../websocket/WebSocket";
 import {interval} from "rxjs";
+import {GameData, GameDate, GameDateEvent, GameUpdateEvent, OpenttdEvent} from "../websocket/OpenttdEvents";
+import {filter, tap} from "rxjs/operators";
+import {ConfigService} from "../api/ConfigService";
+import {ConfigResponse} from "../api/ConfigDTOs";
+import {FetchAllGameDates, FetchAllGameUpdates} from "../websocket/SendEvents";
 
 function HomePage() {
-    const [eventsMap, setEventsMap] = useState<Map<string, SessionEvent>>(new Map());
+    const [configs, setConfigs] = useState<ConfigResponse[]>([]);
+    const [gameInfos, setGameInfos] = useState<Map<string, GameData>>(new Map());
+    const [gameDates, setGameDates] = useState<Map<string, GameDate>>(new Map());
 
     useEffect(() => {
+        ConfigService.getConfigs().subscribe(configs => setConfigs(configs));
         const wsSubscription = webSocketInput$
+            .pipe(
+                tap(ev => {
+                    if (ev.error) {
+                        console.error((ev as ErrorEvent).errorMessage)
+                    }
+                }),
+                filter(ev => !ev.error),
+                filter(ev => {
+                    const oev = ev as OpenttdEvent;
+                    return oev.eventType === "GameUpdateEvent" || oev.eventType === "GameDateEvent";
+                })
+            )
             .subscribe(event => {
                 const ev = event as OpenttdEvent;
-                eventsMap.set(ev.configId, ev.event);
-                const newMap = new Map(eventsMap.entries())
-                setEventsMap(newMap);
+                switch (ev.eventType) {
+                    case "GameUpdateEvent":
+                        gameInfos.set(ev.configId, (ev.event as GameUpdateEvent).game);
+                        setGameInfos(new Map(gameInfos.entries()));
+                        break;
+
+                    case "GameDateEvent":
+                        gameDates.set(ev.configId, (ev.event as GameDateEvent).gameDate);
+                        setGameDates(new Map(gameDates.entries()));
+                        break;
+                }
             });
 
         const pollSubscription = interval(5000)
             .subscribe(() => {
-                webSocketOutput$.next(new SimpleSendEvent("Hello!"))
+                webSocketOutput$.next(FetchAllGameUpdates)
+                webSocketOutput$.next(FetchAllGameDates)
             });
 
         return () => {
@@ -54,9 +77,12 @@ function HomePage() {
     return <div className={"page"}>
         <Row gutter={16}>
             {
-                Array.from(eventsMap.values()).map((sessionEvent, index) =>
+                configs.map((config, index) =>
                     <Col span={6} key={index}>
-                        <ServerItem sessionEvent={sessionEvent}/>
+                        <ServerItem
+                            config={config}
+                            gameDate={gameDates.get(config.id)}
+                            gameInfo={gameInfos.get(config.id)}/>
                     </Col>)
             }
         </Row>

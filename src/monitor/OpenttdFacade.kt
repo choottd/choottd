@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.choottd.config.Config
-import org.choottd.config.ConfigResponse
 import org.choottd.librcon.session.Session
 import kotlin.coroutines.CoroutineContext
 
@@ -45,7 +44,7 @@ class OpenttdFacade(
         while (job.isActive) {
             openttdSession.sessionEvents
                 .onEach {
-                    flow.emit(OpenttdEvent(ConfigResponse(config.id.toString(), config.host, config.port), it))
+                    flow.emit(OpenttdEvent(config.id.toString(), it))
                 }
                 .launchIn(this)
             openttdSession.open().join()

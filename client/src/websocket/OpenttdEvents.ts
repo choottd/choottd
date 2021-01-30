@@ -15,48 +15,44 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {WS_URL} from "../Const";
-import {webSocket} from "rxjs/webSocket";
-import {catchError, tap} from "rxjs/operators";
-import {Observable, of, Subject} from "rxjs";
+import {ReceivedEvent} from "./WebSocket";
+
+type EventType = 'GameUpdateEvent' | 'GameDateEvent' | 'CompanyUpdateEvent' | 'ServerProtocolEvent'
 
 export interface SessionEvent {
     timestamp: number
 }
 
-export interface WSEvent {
+export interface GameDate {
+    year: number,
+    month: number,
+    day: number
 }
 
-export interface ReceivedEvent extends WSEvent {
-}
-
-export interface SendEvent extends WSEvent {
-}
-
-export interface OpenttdEvent extends ReceivedEvent {
-    configId: string
-    event: SessionEvent
-}
-
-export interface DummyEvent extends ReceivedEvent {
-}
-
-export class SimpleSendEvent implements SendEvent {
-    constructor(readonly message: string) {
+export interface GameData {
+    name: string,
+    gameVersion: string,
+    dedicated: boolean,
+    map: {
+        name: string,
+        landscape: string,
+        dateStart: GameDate,
+        seed: number,
+        height: number,
+        width: number
     }
 }
 
-const webSocketSubject$ = webSocket<WSEvent>(WS_URL!);
+export interface GameDateEvent extends SessionEvent {
+    gameDate: GameDate
+}
 
-export const webSocketInput$: Observable<ReceivedEvent> = webSocketSubject$
-    .pipe(
-        catchError((err) => {
-            console.error(err);
-            return of({} as DummyEvent)
-        }),
-        tap(event => {
-            console.debug(event);
-        })
-    )
+export interface GameUpdateEvent extends SessionEvent {
+    game: GameData
+}
 
-export const webSocketOutput$: Subject<SendEvent> = webSocketSubject$;
+export interface OpenttdEvent extends ReceivedEvent {
+    readonly configId: string
+    readonly eventType: EventType
+    readonly event: SessionEvent
+}

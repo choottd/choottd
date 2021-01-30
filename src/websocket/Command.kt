@@ -15,12 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.choottd.monitor
+package org.choottd.websocket
 
-import org.choottd.librcon.session.event.SessionEvent
+enum class CommandType {
+    FetchAllGameUpdates,
+    FetchAllGameDates,
+}
 
-data class OpenttdEvent(
-    val configId: String,
-    val event: SessionEvent,
-    val eventType: String = event::class.java.simpleName
+data class Command(
+    val type: CommandType
 )

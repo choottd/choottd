@@ -34,15 +34,18 @@ import org.choottd.monitor.OpenttdEvent
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger(Application::class.java)
-private val mapper = ObjectMapper()
-private fun convertToJson(event: OpenttdEvent) = mapper.writeValueAsString(event)
 
 @ExperimentalCoroutinesApi
 suspend fun DefaultWebSocketServerSession.webSocketHandler(
+    objectMapper: ObjectMapper,
     monitoringService: MonitoringService,
     eventsFlow: SharedFlow<OpenttdEvent>
 ) {
     val channel = Channel<OpenttdEvent>()
+
+    fun convertEventToJson(event: OpenttdEvent) = objectMapper.writeValueAsString(event)
+    fun convertCommandFromJson(json: String) = objectMapper.readValue(json, Command::class.java)
+
 
     // copies from the flow to the channel
     val eventsJob = launch(Dispatchers.IO) {
@@ -52,7 +55,7 @@ suspend fun DefaultWebSocketServerSession.webSocketHandler(
     val senderJob = launch(Dispatchers.IO) {
         while (true) {
             val event = channel.receive()
-            val json = convertToJson(event)
+            val json = convertEventToJson(event)
             send(json)
         }
     }
@@ -66,9 +69,17 @@ suspend fun DefaultWebSocketServerSession.webSocketHandler(
         }
 
         try {
-            incoming.receive()
-            // TODO support other kind of messages
-            monitoringService.fetchGlobalData()
+            when (val frame = incoming.receive()) {
+                is Frame.Text -> {
+                    val json = frame.readText()
+                    val command = convertCommandFromJson(json)
+                    when (command.type) {
+                        CommandType.FetchAllGameUpdates -> monitoringService.fetchAllGameUpdates()
+                        CommandType.FetchAllGameDates -> monitoringService.fetchAllGameDates()
+                    }
+                }
+            }
+
         } catch (ex: ClosedReceiveChannelException) {
             logger.debug("Websocket closed while waiting for incoming messages")
         }

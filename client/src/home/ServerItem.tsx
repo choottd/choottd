@@ -17,16 +17,27 @@
 
 import React from "react";
 import {Card} from "antd";
-import {SessionEvent} from "../websocket/OpenttdEvents";
+import {GameData, GameDate} from "../websocket/OpenttdEvents";
+import {ConfigResponse} from "../api/ConfigDTOs";
 
 interface Props {
-    sessionEvent: SessionEvent,
+    config: ConfigResponse,
+    gameInfo?: GameData,
+    gameDate?: GameDate,
 }
 
-function ServerItem({sessionEvent}: Props) {
+function ServerItem({config, gameInfo, gameDate}: Props) {
 
-    return <Card title={`${sessionEvent.timestamp}`} extra={1}>
-        <p>{sessionEvent?.timestamp}</p>
+    const gameDateStr = () => {
+        if(gameDate !== undefined) {
+            return `${gameDate.day}.${gameDate.month}.${gameDate.year}`
+        } else {
+            return `???`
+        }
+    };
+
+    return <Card title={`${config.host}:${config.port}`} extra={gameDateStr()}>
+        <p>{gameInfo?.name ?? "???"}</p>
     </Card>
 
 }

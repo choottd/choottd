@@ -23,37 +23,37 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.choottd.config.Config
 import org.choottd.librcon.session.Session
-import kotlin.coroutines.CoroutineContext
+import org.slf4j.LoggerFactory
 
 class OpenttdFacade(
     private val config: Config,
     private val flow: MutableSharedFlow<OpenttdEvent>
-) : CoroutineScope {
+) {
 
     private val job: Job = Job()
 
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + job
+    var openttdSession: Session = Session(BOT_NAME, BOT_VERSION, config.password, config.host, config.port)
 
-    val openttdSession: Session = Session(BOT_NAME, BOT_VERSION, config.password, config.host, config.port)
+    fun start() {
+        logger.debug("Starting facade for $config")
 
-    fun start() = launch {
-        while (job.isActive) {
-            openttdSession.sessionEvents
-                .onEach {
-                    flow.emit(OpenttdEvent(config.id.toString(), it))
-                }
-                .launchIn(this)
-            openttdSession.open().join()
+        openttdSession.sessionEvents
+            .onEach { flow.emit(OpenttdEvent(config.id.toString(), it)) }
+            .launchIn(CoroutineScope(Dispatchers.IO))
+        try {
+            runBlocking { openttdSession.open().join() }
+        } catch (e: Exception) {
+            logger.error("Error in connection to OpenTTD session $openttdSession", e)
         }
     }
 
     fun stop() = job.cancel()
 
     companion object {
+        private val logger = LoggerFactory.getLogger(OpenttdFacade::class.java)
         private const val BOT_NAME = "Choottd"
         private const val BOT_VERSION = "1"
     }

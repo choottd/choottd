@@ -29,6 +29,7 @@ import io.ktor.jackson.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.websocket.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import org.choottd.config.configRouting
@@ -41,6 +42,7 @@ import java.time.Duration
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
+@ExperimentalCoroutinesApi
 @Suppress("unused") // Referenced in application.conf
 fun Application.module() {
     install(ContentNegotiation) {

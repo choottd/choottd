@@ -46,7 +46,6 @@ suspend fun DefaultWebSocketServerSession.webSocketHandler(
     fun convertEventToJson(event: OpenttdEvent) = objectMapper.writeValueAsString(event)
     fun convertCommandFromJson(json: String) = objectMapper.readValue(json, Command::class.java)
 
-
     // copies from the flow to the channel
     val eventsJob = launch(Dispatchers.IO) {
         eventsFlow.onEach { channel.offer(it) }.launchIn(this)

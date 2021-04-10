@@ -19,10 +19,10 @@ import com.moowork.gradle.node.yarn.YarnTask
 
 plugins {
     application
-    kotlin("jvm") version "1.4.21"
+    kotlin("jvm") version "1.4.31"
     id("com.github.node-gradle.node") version "2.2.4"
     maven
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.4.21"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.4.31"
 }
 
 group = "org.choottd"
@@ -36,7 +36,6 @@ repositories {
     mavenLocal()
     jcenter()
     maven { url = uri("https://kotlin.bintray.com/ktor") }
-    maven { url = uri("https://dl.bintray.com/kodein-framework/Kodein-DB") }
     maven { url = uri("https://kotlin.bintray.com/kotlinx") }
     maven {
         url = uri("https://maven.pkg.github.com/choottd/librcon")
@@ -49,7 +48,7 @@ repositories {
 
 dependencies {
     implementation("org.choottd:librcon:0.1.0-SNAPSHOT")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.21")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.31")
 
     implementation("io.ktor:ktor-server-netty:1.5.0")
     implementation("io.ktor:ktor-server-core:1.5.0")

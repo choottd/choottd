@@ -30,6 +30,7 @@ import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.mapNotNull
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import org.choottd.config.configRouting
@@ -84,8 +85,8 @@ fun Application.module() {
     }
 
     install(WebSockets) {
-        pingPeriod = Duration.ofSeconds(15)
-        timeout = Duration.ofSeconds(30)
+        pingPeriod = Duration.ofSeconds(60)
+        timeout = Duration.ofSeconds(15)
         maxFrameSize = Long.MAX_VALUE
         masking = false
     }
@@ -106,13 +107,13 @@ fun Application.module() {
 
         configRouting(db)
 
+        webSocket("/openttdEvents") {
+            webSocketHandler(jacksonObjectMapper(), monitoringService, openttdEventsFlow.asSharedFlow())
+        }
+
         static("/") {
             resources("static")
             defaultResource("static/index.html")
-        }
-
-        webSocket("/openttdEvents") {
-            webSocketHandler(jacksonObjectMapper(), monitoringService, openttdEventsFlow.asSharedFlow())
         }
     }
 

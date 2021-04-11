@@ -19,10 +19,10 @@ import com.moowork.gradle.node.yarn.YarnTask
 
 plugins {
     application
-    kotlin("jvm") version "1.4.31"
+    kotlin("jvm") version "1.4.32"
     id("com.github.node-gradle.node") version "2.2.4"
     maven
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.4.31"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.4.32"
 }
 
 group = "org.choottd"
@@ -47,21 +47,21 @@ repositories {
 }
 
 dependencies {
-    implementation("org.choottd:librcon:0.1.0-SNAPSHOT")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.31")
+    implementation("org.choottd:librcon:0.2.0-SNAPSHOT")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.32")
 
-    implementation("io.ktor:ktor-server-netty:1.5.0")
-    implementation("io.ktor:ktor-server-core:1.5.0")
-    implementation("io.ktor:ktor-server-host-common:1.5.0n")
-    implementation("io.ktor:ktor-websockets:1.5.0")
-    implementation("io.ktor:ktor-jackson:1.5.0")
+    implementation("io.ktor:ktor-server-netty:1.5.3")
+    implementation("io.ktor:ktor-server-core:1.5.3")
+    implementation("io.ktor:ktor-server-host-common:1.5.3")
+    implementation("io.ktor:ktor-websockets:1.5.3")
+    implementation("io.ktor:ktor-jackson:1.5.3")
 
     implementation("ch.qos.logback:logback-classic:1.2.3")
 
     implementation("org.dizitart:nitrite:3.4.3")
     implementation("org.dizitart:potassium-nitrite:3.4.3")
 
-    testImplementation("io.ktor:ktor-server-tests:1.5.0")
+    testImplementation("io.ktor:ktor-server-tests:1.5.3")
 }
 
 kotlin.sourceSets["main"].kotlin.srcDirs("src")
